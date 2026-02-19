@@ -13,8 +13,8 @@ RUN npm ci --omit=dev
 # Copy rest of application
 COPY . .
 
+# Start the app
+CMD ["node", "src/index.js"]
+
 # Expose app port (change if needed)
 EXPOSE 3000
-
-# Start the app
-CMD ["node", "src/server.js"]
