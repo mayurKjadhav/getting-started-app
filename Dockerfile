@@ -1,20 +1,26 @@
-# Use Node 24 Alpine
-FROM node:24-alpine
+# ---------- Stage 1: Build dependencies ----------
+FROM node:24-alpine AS build
 
-# Create app directory
 WORKDIR /app
 
-# Copy package files first (better layer caching)
+# Copy only package files first
 COPY package*.json ./
 
-# Install only production dependencies
-RUN npm ci --omit=dev
+# Install dependencies
+RUN npm install
+RUN npm install mysql2
 
-# Copy rest of application
+# Copy the rest of the source code
 COPY . .
 
-# Start the app
-CMD ["node", "src/index.js"]
+# ---------- Stage 2: Runtime image ----------
+FROM node:24-alpine
 
-# Expose app port (change if needed)
+WORKDIR /app
+
+# Copy only the built app + node_modules from the build stage
+COPY --from=build /app /app
+
 EXPOSE 3000
+
+CMD ["node", "src/index.js"]
